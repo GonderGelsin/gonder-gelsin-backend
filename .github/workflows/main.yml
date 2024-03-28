@@ -21,6 +21,6 @@ jobs:
     - name: Deploy to PythonAnywhere
       uses: davidwells/python-anywhere-deploy-action@v1
       with:
-        pythonAnywhereUsername: ${{ secrets.PYTHONANYWHERE_USERNAME }}  # PythonAnywhere kullanıcı adı
-        pythonAnywherePassword: ${{ secrets.PYTHONANYWHERE_PASSWORD }}  # PythonAnywhere parolası
-        pythonAnywhereDomain: 'yourdomain.pythonanywhere.com'  # PythonAnywhere uygulamanızın domain'i
+        pythonAnywhereUsername: ${{ secrets.PYTHONANYWHERE_USERNAME }} 
+        pythonAnywherePassword: ${{ secrets.PYTHONANYWHERE_PASSWORD }}  
+        pythonAnywhereDomain: 'https://gondergelsin.pythonanywhere.com/' 
