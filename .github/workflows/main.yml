@@ -13,7 +13,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       
-    - name: Deploy
+    - name: Re-Deploy
       uses: umuttopalak/pythonanywhere-deploy-action@v2.1
       with:
           HOST : ${{ secrets.HOST }}
@@ -21,5 +21,3 @@ jobs:
           API_TOKEN : ${{ secrets.API_TOKEN }}
           DOMAIN_NAME : ${{ secrets.DOMAIN_NAME }}
           CONSOLE_ID : ${{ secrets.CONSOLE_ID }}
-            
-
