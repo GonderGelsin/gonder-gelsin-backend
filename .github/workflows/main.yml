@@ -13,16 +13,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       
-    - name: Setup Python
-      uses: actions/setup-python@v2
+    - name: Deploy
+      uses: umuttopalak/pythonanywhere-deploy-action@v1
       with:
-        python-version: '3.10' 
-
-    - name: Reload pythonanywhere webapp
-      uses: jensvog/pythonanywhere-webapp-reload-action@v1
-      with:
-          username: ${{ secrets.USERNAME }}
-          api-token: ${{ secrets.API_TOKEN }}
-          domain-name: 'https://gondergelsin.pythonanywhere.com/' 
+          HOST : ${{ secrets.HOST }}
+          USERNAME : ${{ secrets.USERNAME }}
+          API_TOKEN : ${{ secrets.API_TOKEN }}
+          DOMAIN_NAME : ${{ secrets.DOMAIN_NAME }}
+          CONSOLE_ID : ${{ secrets.CONSOLE_ID }}
             
 
