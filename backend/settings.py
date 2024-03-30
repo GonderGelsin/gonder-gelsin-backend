@@ -101,27 +101,23 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+#DATABASES = {
+#   'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'defaultdb',
+#        'USER': 'avnadmin',
+#        'PASSWORD': 'AVNS_ULc72rDz14j4lrrqUVA',
+#        'HOST': 'pg-346ef314-gondergelsin.a.aivencloud.com',
+#        'PORT': '26849'
+#    }
+#}
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'defaultdb',
-        'USER': 'avnadmin',
-        'PASSWORD': 'AVNS_ULc72rDz14j4lrrqUVA',
-        'HOST': 'pg-346ef314-gondergelsin.a.aivencloud.com',
-        'PORT': '26849'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DB_NAME', 'defaultdb'),
-#         'USER': os.environ.get('DB_USER', 'avnadmin'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD', 'AVNS_ULc72rDz14j4lrrqUVA'),
-#         'HOST': os.environ.get('DB_HOST', 'pg-346ef314-gondergelsin.a.aivencloud.com'),
-#         'PORT': os.environ.get('DB_PORT', '26849'),
-#     }
-# }
 
 
 # Password validation
