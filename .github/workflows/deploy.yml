@@ -10,8 +10,8 @@ jobs:
       - name: Re-Deploy Pythonanywhere Django API
         uses: umuttopalak/pythonanywhere-deploy-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          api_token: ${{ secrets.API_TOKEN }}
-          domain_name: ${{ secrets.DOMAIN_NAME }}
-          console_id: ${{ secrets.CONSOLE_ID }}
+          host: "www.pythonanywhere.com"
+          username: "gondergelsin"
+          api_token: "70551989b1813e53c7e05f72547d9abd33d3f562"
+          domain_name: "gondergelsin.pythonanywhere.com"
+          console_id: "33084452"
