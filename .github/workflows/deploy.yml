@@ -1,0 +1,23 @@
+name: PythonAnywhere Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Re-Deploy
+      uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
+      with:
+          host : ${{ secrets.HOST }}
+          username : ${{ secrets.USERNAME }}
+          api_token : ${{ secrets.API_TOKEN }}
+          domain_name : ${{ secrets.DOMAIN_NAME }}
+          console_id : ${{ secrets.CONSOLE_ID }}
