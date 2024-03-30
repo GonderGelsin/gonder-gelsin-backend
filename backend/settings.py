@@ -104,13 +104,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT')
+        'NAME': 'defaultdb',
+        'USER': 'avnadmin',
+        'PASSWORD': 'AVNS_ULc72rDz14j4lrrqUVA',
+        'HOST': 'pg-346ef314-gondergelsin.a.aivencloud.com',
+        'PORT': '26849'
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ.get('DB_NAME', 'defaultdb'),
+#         'USER': os.environ.get('DB_USER', 'avnadmin'),
+#         'PASSWORD': os.environ.get('DB_PASSWORD', 'AVNS_ULc72rDz14j4lrrqUVA'),
+#         'HOST': os.environ.get('DB_HOST', 'pg-346ef314-gondergelsin.a.aivencloud.com'),
+#         'PORT': os.environ.get('DB_PORT', '26849'),
+#     }
+# }
 
 
 # Password validation
