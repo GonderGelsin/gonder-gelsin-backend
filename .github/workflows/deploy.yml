@@ -1,23 +1,17 @@
-name: PythonAnywhere Deployment
-
-on:
-  push:
-    branches:
-      - master
-
+name: Deploy pythonanywhere webapp
+on: [push]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      
-    - name: Re-Deploy
-      uses: umuttopalak/pythonanywhere-deploy-action@master
-      with:
-          host : ${{ secrets.HOST }}
-          username : ${{ secrets.USERNAME }}
-          api_token : ${{ secrets.API_TOKEN }}
-          domain_name : ${{ secrets.DOMAIN_NAME }}
-          console_id : ${{ secrets.CONSOLE_ID }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Re-Deploy Pythonanywhere Django API
+        uses: umuttopalak/pythonanywhere-deploy-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          api_token: ${{ secrets.API_TOKEN }}
+          domain_name: ${{ secrets.DOMAIN_NAME }}
+          console_id: ${{ secrets.CONSOLE_ID }}
