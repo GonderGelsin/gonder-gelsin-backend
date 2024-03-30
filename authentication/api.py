@@ -44,17 +44,14 @@ class CustomUserAPI(APIView):
             'options': {},
         }
 
-        request_data = request.data
-        serializer = CustomUserSerializer(data=request_data)
+        custom_users = User.objects.first()
+        serializer = UserSerializer(custom_users, many=False)
 
-        if serializer.is_valid():
-            serializer.save()
-            content['status'] = 'OK'
-            content['message'] = 'User Created Succesfully'
+        content['data'] = serializer.data
+        content['status'] = 'OK'
+        content['message'] = "User Retrieved Successfully."
 
-            return Response(content, status=status.HTTP_200_OK)
-
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        return Response(content, status=status.HTTP_200_OK)
 
 
 class UserSignUpAPI(APIView):
