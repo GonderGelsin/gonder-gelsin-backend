@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     'authentication',
+    'userprofile'
 ]
 
 MIDDLEWARE = [
