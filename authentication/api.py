@@ -22,29 +22,29 @@ logger = getLogger()
 
 
 class UserSignUpAPI(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = []
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            serializer.save()
             return Response({'user': serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSignInAPI(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = []
 
     def post(self, request):
         serializer = TokenObtainSerializer(data=request.data)
         if serializer.is_valid():
+        
             user = serializer.validated_data['user']
-            refresh = RefreshToken.for_user(user)
-
+            token, created = Token.objects.get_or_create(user=user)
             return Response({
-                'user': UserSerializer(user).data,
-                'access_token': str(refresh.access_token),
-                'refresh_token': str(refresh)
-            }, status=status.HTTP_200_OK)
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email
+            })
 
         return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
