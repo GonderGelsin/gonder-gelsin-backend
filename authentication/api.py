@@ -29,7 +29,7 @@ class UserSignUpAPI(APIView):
         if serializer.is_valid():
             serializer.save()
             return CustomSuccessResponse(input_data={'user': serializer.data}, msj="User Created Successfully.", status_code=status.HTTP_201_CREATED)
-        return CustomErrorResponse(msj=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return CustomErrorResponse(msj=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSignInAPI(APIView):
@@ -45,4 +45,4 @@ class UserSignInAPI(APIView):
                              'user_id': user.pk, 'email': user.email}
             return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
 
-        return CustomErrorResponse(msj={'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return CustomErrorResponse(msj={'error': serializer.errors}, status_code=status.HTTP_400_BAD_REQUEST)
