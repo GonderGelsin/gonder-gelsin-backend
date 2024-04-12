@@ -23,7 +23,7 @@ class UserProfileDetailAPI(APIView):
         try:
             user = CustomUser.objects.first()
             serializer = UserProfileSerializer(user)
-            return CustomSuccessResponse(serializer.data, status=status.HTTP_200_OK)
+            return CustomSuccessResponse(serializer.data, status_code=status.HTTP_200_OK)
 
         except Exception as e:
             return CustomErrorResponse(msj=str(e), status_code=status.HTTP_400_BAD_REQUEST)
