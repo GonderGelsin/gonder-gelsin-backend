@@ -21,11 +21,22 @@ class UserProfileDetailAPI(APIView):
 
     def get(self, request):
         try:
-            user = CustomUser.objects.first()
-            serializer = UserProfileSerializer(user)
-            return CustomSuccessResponse(serializer.data, status_code=status.HTTP_200_OK)
+            user = request.user
+            if user:
+                serializer = UserProfileSerializer(user)
+                return CustomSuccessResponse(input_data={'profile': serializer.data}, status_code=status.HTTP_200_OK)
+
+            return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return CustomErrorResponse(msj=str(e), status_code=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request):
+        request_data = request.data
+        serializer = UserProfileSerializer(
+            instance=request.user, data=request_data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return CustomSuccessResponse(status_code=status.HTTP_200_OK)
 
+        return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
