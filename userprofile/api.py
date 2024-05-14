@@ -43,6 +43,9 @@ class UserProfileDetailAPI(APIView):
 
 
 class TestAPI(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    
     def get(self, request):
         users = CustomUser.objects.all()
         serializer = UserProfileSerializer(users, many=True)
