@@ -108,10 +108,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'gondergelsin',
-        'USER': 'gondergelsin_owner',
-        'PASSWORD': 'IlCeSrwB63uV',
-        'HOST': 'ep-aged-mountain-a5km0il3.us-east-2.aws.neon.tech',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
         'PORT': '',
         'OPTIONS': {
             'sslmode': 'require',
