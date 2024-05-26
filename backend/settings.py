@@ -38,7 +38,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": [
-        'rest_framework.permissions.IsAuthenticated', 
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
@@ -105,23 +105,27 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-#DATABASES = {
-#   'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'defaultdb',
-#        'USER': 'avnadmin',
-#        'PASSWORD': 'AVNS_ULc72rDz14j4lrrqUVA',
-#        'HOST': 'pg-346ef314-gondergelsin.a.aivencloud.com',
-#        'PORT': '26849'
-#    }
-#}
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gondergelsin',
+        'USER': 'gondergelsin_owner',
+        'PASSWORD': 'IlCeSrwB63uV',
+        'HOST': 'ep-aged-mountain-a5km0il3.us-east-2.aws.neon.tech',
+        'PORT': '',
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
