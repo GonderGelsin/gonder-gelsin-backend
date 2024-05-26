@@ -1,7 +1,6 @@
 import json
 
 from django.conf import settings
-from django_cognito_jwt.backend import JSONWebTokenAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication,
