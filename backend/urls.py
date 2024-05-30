@@ -43,5 +43,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('authentication/', include('authentication.urls')),
     path('user/', include('userprofile.urls')),
-    path("transaction/", include('transaction.urls'))
+    path('user/notification/', include('notification.urls')),
+    path("transaction/", include('transaction.urls')),
 ]
