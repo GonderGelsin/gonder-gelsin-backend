@@ -32,7 +32,7 @@ class NotificationListCreate(APIView):
 class NotificationDetail(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-    
+
     def get_object(self, pk, user):
         try:
             return Notification.objects.get(pk=pk, user=user)
@@ -62,3 +62,19 @@ class NotificationDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         notification.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class NotificationRead(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, format=None):
+        notification_id = request.data.get('id')
+        try:
+            notification = Notification.objects.get(id=notification_id, user=request.user)
+        except Notification.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'Notification marked as read'}, status=status.HTTP_200_OK)
