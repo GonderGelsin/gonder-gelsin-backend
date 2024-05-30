@@ -1,9 +1,18 @@
 import json
+import random
+import string
 from logging import getLogger
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
 from rest_framework.authtoken.models import Token
@@ -16,6 +25,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.utils import CustomErrorResponse, CustomSuccessResponse
 
+from .models import CustomUser
 from .serializers import TokenObtainSerializer, UserSerializer
 
 logger = getLogger()
@@ -46,3 +56,32 @@ class UserSignInAPI(APIView):
             return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
 
         return CustomErrorResponse(msj={'error': serializer.errors}, status_code=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetRequestAPI(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        user = get_object_or_404(CustomUser, email=email)
+
+        if user:
+            # Generate token for password reset
+            token = default_token_generator.make_token(user)
+
+            # Build reset password link
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            reset_link = f"http://yourdomain.com/reset-password/{uid}/{token}/"
+
+            # Send reset password email
+            subject = "Reset your password"
+            message = render_to_string(r'reset_password_email.html', {
+                'reset_link': reset_link,
+            })
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
+
+            return CustomSuccessResponse(msj="Password reset link has been sent to your email.", status_code=status.HTTP_200_OK)
+
+        return CustomErrorResponse(msj="User not found.", status_code=status.HTTP_404_NOT_FOUND)
+    
+    
