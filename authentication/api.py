@@ -23,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView, status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from utils.utils import CustomErrorResponse, CustomSuccessResponse
+from utils.utils import CustomErrorResponse, CustomSuccessResponse, send_email
 
 from .models import CustomUser
 from .serializers import TokenObtainSerializer, UserSerializer
@@ -62,26 +62,29 @@ class PasswordResetRequestAPI(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
-        user = get_object_or_404(CustomUser, email=email)
+        try:
+            email = request.data.get('email')
+            user = get_object_or_404(CustomUser, email=email)
+            send_email('Test Subject', 'This is a test email body.', user.email)
+            return CustomSuccessResponse()
+        except Exception as e:
+            return Response(data=str(e))
 
-        if user:
-            # Generate token for password reset
-            token = default_token_generator.make_token(user)
+        # if user:
+        #     # Generate token for password reset
+        #     token = default_token_generator.make_token(user)
 
-            # Build reset password link
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            reset_link = f"https://gondergelsin.pythonanywhere.com/reset-password/{uid}/{token}/"
+        #     # Build reset password link
+        #     uid = urlsafe_base64_encode(force_bytes(user.pk))
+        #     reset_link = f"https://gondergelsin.pythonanywhere.com/reset-password/{uid}/{token}/"
 
-            # Send reset password email
-            subject = "Reset your password"
-            message = render_to_string(r'reset_password_email.html', {
-                'reset_link': reset_link,
-            })
-            send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
+        #     # Send reset password email
+        #     subject = "Reset your password"
+        #     message = render_to_string(r'reset_password_email.html', {
+        #         'reset_link': reset_link,
+        #     })
+        #     send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
 
-            return CustomSuccessResponse(msj="Password reset link has been sent to your email.", status_code=status.HTTP_200_OK)
+        #     return CustomSuccessResponse(msj="Password reset link has been sent to your email.", status_code=status.HTTP_200_OK)
 
-        return CustomErrorResponse(msj="User not found.", status_code=status.HTTP_404_NOT_FOUND)
-    
-    
+        # return CustomErrorResponse(msj="User not found.", status_code=status.HTTP_404_NOT_FOUND)
