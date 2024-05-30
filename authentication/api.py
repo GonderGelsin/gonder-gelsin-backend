@@ -71,7 +71,7 @@ class PasswordResetRequestAPI(APIView):
 
             # Build reset password link
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-            reset_link = f"http://yourdomain.com/reset-password/{uid}/{token}/"
+            reset_link = f"https://gondergelsin.pythonanywhere.com/reset-password/{uid}/{token}/"
 
             # Send reset password email
             subject = "Reset your password"
