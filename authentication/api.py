@@ -6,7 +6,7 @@ from logging import getLogger
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -66,6 +66,9 @@ class PasswordResetRequestAPI(APIView):
             email = request.data.get('email')
             user = get_object_or_404(CustomUser, email=email)
             send_email('Test Subject', 'This is a test email body.', user.email)
+            
+            email = EmailMessage('Test', 'Test', to=['umuttopalak@hotmail.com'])
+            email.send()
             return CustomSuccessResponse()
         except Exception as e:
             return Response(data=str(e))
