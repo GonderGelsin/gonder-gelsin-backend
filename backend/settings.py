@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'utils',
     'transaction',
     'notification',
+    'order',
 ]
 
 MIDDLEWARE = [
