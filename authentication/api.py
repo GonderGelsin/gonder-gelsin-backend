@@ -91,3 +91,10 @@ class PasswordResetRequestAPI(APIView):
         #     return CustomSuccessResponse(msj="Password reset link has been sent to your email.", status_code=status.HTTP_200_OK)
 
         # return CustomErrorResponse(msj="User not found.", status_code=status.HTTP_404_NOT_FOUND)
+
+
+class TestListAPI(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        return Response(data=[], status=status.HTTP_200_OK)
