@@ -49,3 +49,20 @@ class ComplatedOrdersAPIView(APIView):
         orders = Order.objects.filter(status__exact='C')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+
+class UpdateOrderStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, pk):
+        order = Order.objects.get(pk=pk)
+        if order.status == 'P':
+            order.status = 'O'
+        elif order.status == 'O':
+            order.status = 'C'
+        else:
+            return Response(data={"exp": "Order already delivered"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.save()
+        return Response(data={"status": "Done"}, status=status.HTTP_200_OK)
