@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -51,7 +52,8 @@ class ComplatedOrdersAPIView(APIView):
             serializer = OrderSerializer(orders, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response(data={"exp" : str(e)})
+            return Response(data={"exp": str(e)})
+
 
 class UpdateOrderStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -68,3 +70,13 @@ class UpdateOrderStatusAPIView(APIView):
 
         order.save()
         return Response(data={"status": "Done"}, status=status.HTTP_200_OK)
+
+
+class DeleteOrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def delete(self, request, pk):
+        order = get_object_or_404(Order, pk=pk, user=request.user)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
