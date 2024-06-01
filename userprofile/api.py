@@ -45,9 +45,33 @@ class UserProfileDetailAPI(APIView):
 class TestAPI(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
-    
+
     def get(self, request):
         users = CustomUser.objects.all()
         serializer = UserProfileSerializer(users, many=True)
         return CustomSuccessResponse(input_data=serializer.data)
-    
+
+
+class UserNotificationAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        data = {
+            'sms_notification': user.sms_notification,
+            'email_notification': user.email_notification
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        if 'sms_notification' in data:
+            user.sms_notification = data['sms_notification']
+        if 'email_notification' in data:
+            user.email_notification = data['email_notification']
+
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

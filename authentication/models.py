@@ -44,6 +44,8 @@ class CustomUser(AbstractUser):
     full_name = models.CharField(_('full name'), max_length=255, null=True, blank=True)
     turkish_id_number = models.CharField(_("turkish_id_number"), max_length=11)
     phone_number = models.CharField(_("phone_number"), max_length=13)
+    sms_notification = models.BooleanField(_("sms_notification"), default=False)
+    email_notification = models.BooleanField(_("email_notification"), default=False)
 
     REQUIRED_FIELDS = ['email', 'phone_number', 'password', 'turkish_id_number', 'first_name', 'last_name']
 
