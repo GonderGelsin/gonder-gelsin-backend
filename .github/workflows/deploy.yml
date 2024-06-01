@@ -12,6 +12,8 @@ jobs:
         with:
           host: "www.pythonanywhere.com"
           username: "gondergelsin"
-          api_token: "70551989b1813e53c7e05f72547d9abd33d3f562"
+          api_token: "9c90e9e9b9501d6dace110d909769aa256995e3f"
           domain_name: "gondergelsin.pythonanywhere.com"
-          console_id: "33084452"
+          console_id: "34072846"
+          virtual_env: "venv"
+          directory: "gonder-gelsin-backend"
