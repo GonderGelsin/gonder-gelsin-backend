@@ -19,7 +19,7 @@ class OrderListCreateAPIView(APIView):
             filter_key = f"{param}__icontains"
             filters[filter_key] = value
 
-        orders = Order.objects.filter(Q(**filters))
+        orders = Order.objects.filter(Q(**filters), user=request.user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -36,7 +36,7 @@ class ActiveOrdersAPIView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
-        orders = Order.objects.filter(status__in=['P', 'O'])
+        orders = Order.objects.filter(status__in=['P', 'O'], user=request.user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -46,10 +46,12 @@ class ComplatedOrdersAPIView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
-        orders = Order.objects.filter(status__exact='C')
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data)
-
+        try:
+            orders = Order.objects.filter(status__exact='C', user=request.user)
+            serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(data={"exp" : str(e)})
 
 class UpdateOrderStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
