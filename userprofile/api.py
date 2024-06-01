@@ -75,3 +75,25 @@ class UserNotificationAPI(APIView):
 
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserLanguageAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        data = {
+            'app_lang': user.app_lang
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        if 'app_lang' in data:
+            user.app_lang = data['app_lang']
+
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -46,7 +46,8 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(_("phone_number"), max_length=13)
     sms_notification = models.BooleanField(_("sms_notification"), default=False)
     email_notification = models.BooleanField(_("email_notification"), default=False)
-
+    app_lang = models.CharField(_("app_lang"), default="tr", max_length=3)
+    
     REQUIRED_FIELDS = ['email', 'phone_number', 'password', 'turkish_id_number', 'first_name', 'last_name']
 
     objects = CustomUserManager()
