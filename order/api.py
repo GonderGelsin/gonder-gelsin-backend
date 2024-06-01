@@ -39,3 +39,13 @@ class ActiveOrdersAPIView(APIView):
         orders = Order.objects.filter(status__in=['P', 'O'])
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+
+class ComplatedOrdersAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        orders = Order.objects.filter(status__exact='C')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
