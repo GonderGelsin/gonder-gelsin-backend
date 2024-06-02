@@ -98,3 +98,21 @@ class TestListAPI(APIView):
     
     def get(self, request):
         return Response(data=[], status=status.HTTP_200_OK)
+
+
+class UserDeviceAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        request_data = request.data
+        if 'device_token' in request_data and request_data['device_token']:
+            user = request.user
+            user.device_token = request_data['device_token']
+            user.save()
+            return CustomSuccessResponse(status_code=status.HTTP_200_OK)
+
+        return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
