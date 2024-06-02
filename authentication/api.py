@@ -95,7 +95,7 @@ class PasswordResetRequestAPI(APIView):
 
 class TestListAPI(APIView):
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         return Response(data=[], status=status.HTTP_200_OK)
 
@@ -105,7 +105,8 @@ class UserDeviceAPI(APIView):
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
-        pass
+        user = request.user
+        return CustomSuccessResponse(input_data={"device_token": user.device_token}, status_code=status.HTTP_200_OK)
 
     def post(self, request):
         request_data = request.data
