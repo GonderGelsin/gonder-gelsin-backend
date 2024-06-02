@@ -47,6 +47,8 @@ class CustomUser(AbstractUser):
     sms_notification = models.BooleanField(_("sms_notification"), default=False)
     email_notification = models.BooleanField(_("email_notification"), default=False)
     app_lang = models.CharField(_("app_lang"), default="tr", max_length=3)
+    device_token = models.CharField(max_length=255, unique=True, null=True, blank=True)
+
     
     REQUIRED_FIELDS = ['email', 'phone_number', 'password', 'turkish_id_number', 'first_name', 'last_name']
 
