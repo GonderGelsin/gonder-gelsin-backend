@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from fcm_django.models import FCMDevice
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication,
                                            TokenAuthentication)
@@ -65,9 +66,11 @@ class PasswordResetRequestAPI(APIView):
         try:
             email = request.data.get('email')
             user = get_object_or_404(CustomUser, email=email)
-            send_email('Test Subject', 'This is a test email body.', user.email)
-            
-            email = EmailMessage('Test', 'Test', to=['umuttopalak@hotmail.com'])
+            send_email('Test Subject',
+                       'This is a test email body.', user.email)
+
+            email = EmailMessage('Test', 'Test', to=[
+                                 'umuttopalak@hotmail.com'])
             email.send()
             return CustomSuccessResponse()
         except Exception as e:
@@ -106,14 +109,31 @@ class UserDeviceAPI(APIView):
 
     def get(self, request):
         user = request.user
-        return CustomSuccessResponse(input_data={"device_token": user.device_token}, status_code=status.HTTP_200_OK)
+        devices = FCMDevice.objects.filter(user=user)
+        device_tokens = [device.registration_id for device in devices]
+        return CustomSuccessResponse(input_data={"device_tokens": device_tokens}, status_code=status.HTTP_200_OK)
 
     def post(self, request):
         request_data = request.data
-        if 'device_token' in request_data and request_data['device_token']:
-            user = request.user
-            user.device_token = request_data['device_token']
-            user.save()
-            return CustomSuccessResponse(status_code=status.HTTP_200_OK)
+        device_token = request_data.get('device_token')
+        device_type = request_data.get(
+            'device_type', 'android')  # or 'ios', 'web'
 
-        return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
+        if not device_token:
+            return CustomErrorResponse(input_data={"error": "Device token is required"}, status_code=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+
+        # Check if the device already exists for the user
+        device, created = FCMDevice.objects.get_or_create(
+            user=user,
+            registration_id=device_token,
+            defaults={'type': device_type},
+        )
+
+        if not created:
+            # If the device already exists, update the type if necessary
+            device.type = device_type
+            device.save()
+
+        return CustomSuccessResponse(status_code=status.HTTP_200_OK)

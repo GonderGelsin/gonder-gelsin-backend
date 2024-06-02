@@ -1,10 +1,11 @@
-# notification/views.py
-
 import os
+from logging import getLogger
 
+import firebase_admin.messaging as fbm
 from django.conf import settings
 from django.http import JsonResponse
 from dotenv import load_dotenv
+from fcm_django.models import FCMDevice
 from pyfcm import FCMNotification
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -17,6 +18,8 @@ from utils.utils import CustomErrorResponse, CustomSuccessResponse
 
 from .models import Notification
 from .serializers import NotificationSerializer
+
+logger = getLogger("my_logger")
 
 
 class NotificationListCreate(APIView):
@@ -89,20 +92,33 @@ class NotificationRead(APIView):
 
 
 class SendNotificationAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
     def post(self, request):
         request_data = request.data
-        registration_id = request_data.get('registration_id')
-        message_title = request_data.get('message_title')
-        message_body = request_data.get('message_body')
+        user = request.user
+        title = request_data.get("title", "Gönder Gelsin")
+        message_body = request_data.get("message")
 
-        if not registration_id or not message_title or not message_body:
-            return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
+        if not message_body:
+            return CustomErrorResponse(input_data={"error": "Message body is required"}, status_code=status.HTTP_400_BAD_REQUEST)
 
-        push_service = FCMNotification(api_key=settings.SERVER_KEY)
-        result = push_service.notify_single_device(
-            registration_id=registration_id,
-            message_title=message_title,
-            message_body=message_body
-        )
+        devices = FCMDevice.objects.filter(user=user)
+        logger.warning("---->")
+        logger.warning(devices.first())
 
-        return CustomSuccessResponse(input_data=result, status_code=status.HTTP_200_OK)
+        for device in devices:
+            try:
+                message = fbm.Message(
+                    notification=fbm.Notification(
+                        title=title, body=message_body),
+                    token=device.registration_id
+                )
+                fbm.send(message)
+            except Exception as e:
+                logger.error(
+                    f"Failed to send message to device {device.registration_id}: {str(e)}")
+                return Response({"error": f"Failed to send message: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return CustomSuccessResponse(status_code=status.HTTP_200_OK)
