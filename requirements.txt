@@ -38,9 +38,12 @@ geographiclib==2.0
 geojson==3.0.1
 geopy==2.4.1
 gevent==23.9.1
+google-api-core==2.19.0
+google-api-python-client==2.131.0
 google-auth==2.29.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
+googleapis-common-protos==1.63.0
 greenlet==3.0.1
 gunicorn==20.1.0
 h11==0.14.0
@@ -72,6 +75,8 @@ pandas==2.0.3
 Pillow==9.5.0
 platformdirs==4.1.0
 pluggy==1.2.0
+proto-plus==1.23.0
+protobuf==4.25.3
 psycopg2-binary==2.9.6
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
@@ -79,6 +84,7 @@ pycodestyle==2.11.0
 pycparser==2.21
 pydantic==1.10.7
 pydantic_core==2.18.2
+pyfcm==1.5.4
 Pygments==2.17.2
 PyJWT==2.7.0
 pyparsing==3.1.2
