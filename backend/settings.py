@@ -134,6 +134,7 @@ EMAIL_USE_TLS = True
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REFRESH_TOKEN = os.environ.get('GOOGLE_REFRESH_TOKEN')
+SERVER_KEY = os.environ.get("SERVER_KEY")
 
 
 # Password validation
