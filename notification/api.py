@@ -1,5 +1,11 @@
 # notification/views.py
 
+import os
+
+from django.conf import settings
+from django.http import JsonResponse
+from dotenv import load_dotenv
+from pyfcm import FCMNotification
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication.models import CustomUser
+from utils.utils import CustomErrorResponse, CustomSuccessResponse
 
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -71,10 +78,31 @@ class NotificationRead(APIView):
     def post(self, request, format=None):
         notification_id = request.data.get('id')
         try:
-            notification = Notification.objects.get(id=notification_id, user=request.user)
+            notification = Notification.objects.get(
+                id=notification_id, user=request.user)
         except Notification.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         notification.is_read = True
         notification.save()
         return Response({'status': 'Notification marked as read'}, status=status.HTTP_200_OK)
+
+
+class SendNotificationAPI(APIView):
+    def post(self, request):
+        request_data = request.data
+        registration_id = request_data.get('registration_id')
+        message_title = request_data.get('message_title')
+        message_body = request_data.get('message_body')
+
+        if not registration_id or not message_title or not message_body:
+            return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
+
+        push_service = FCMNotification(api_key=settings.SERVER_KEY)
+        result = push_service.notify_single_device(
+            registration_id=registration_id,
+            message_title=message_title,
+            message_body=message_body
+        )
+
+        return CustomSuccessResponse(input_data=result, status_code=status.HTTP_200_OK)
