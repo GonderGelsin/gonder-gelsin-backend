@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView, status
 
 from authentication.models import CustomUser
-from utils.utils import CustomErrorResponse, CustomSuccessResponse
+from utils.utils import (CustomErrorResponse, CustomSuccessResponse,
+                         send_notification)
 
 from .serializers import UserProfileSerializer, UserProfileTestSerializer
 
@@ -49,6 +50,7 @@ class TestAPI(APIView):
     def get(self, request):
         users = CustomUser.objects.all()
         serializer = UserProfileTestSerializer(users, many=True)
+        send_notification()
         return CustomSuccessResponse(input_data=serializer.data)
 
 
