@@ -50,7 +50,7 @@ class TestAPI(APIView):
     def get(self, request):
         users = CustomUser.objects.all()
         serializer = UserProfileTestSerializer(users, many=True)
-        send_notification()
+        print(send_notification("dd0MdIfRTQakTHGTt4hqXR:APA91bHSmZ-lkYdGj7YizmmvA07rl_9IDsTSLriwd1fM4iEPPuTtkihfVuGIRYF4pSF9oFmeD-ASdSzuEwO6mqKIUGG-CjdAEpCxG97wykRxxOhWb9q8SX1o06H1mLH-g0gSZnKmM7ZO"))
         return CustomSuccessResponse(input_data=serializer.data)
 
 

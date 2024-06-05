@@ -3,6 +3,7 @@ import os
 from email.mime.text import MIMEText
 
 from django.conf import settings
+from firebase_admin import credentials, initialize_app, messaging
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -79,3 +80,20 @@ def send_email(subject, body, to):
         print(f'Message Id: {sent_message["id"]}')
     except Exception as error:
         print(f'An error occurred: {error}')
+
+
+def send_notification(token):
+    try:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title="title",
+                body="message",
+            ),
+            token=token,
+        )
+        response = messaging.send(message)
+        return response
+
+    except Exception as e:
+        print(str(e))
+        return str(e)
