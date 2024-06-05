@@ -96,4 +96,4 @@ class UserLanguageAPI(APIView):
             user.app_lang = data['app_lang']
 
         user.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
