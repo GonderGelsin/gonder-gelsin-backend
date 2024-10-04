@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'transaction',
     'notification',
     'order',
+    'invoice',
     'fcm_django',
 ]
 

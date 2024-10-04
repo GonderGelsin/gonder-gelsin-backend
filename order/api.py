@@ -1,5 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +16,14 @@ class OrderListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Get a list of orders with optional filters",
+        manual_parameters=[
+            openapi.Parameter('status', openapi.IN_QUERY, description="Order status", type=openapi.TYPE_STRING),
+            openapi.Parameter('date', openapi.IN_QUERY, description="Order date", type=openapi.TYPE_STRING),
+        ],
+        responses={200: OrderSerializer(many=True)}
+    )
     def get(self, request):
         filters = {}
         for param, value in request.query_params.items():
@@ -24,6 +34,11 @@ class OrderListCreateAPIView(APIView):
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Create a new order",
+        request_body=OrderSerializer,
+        responses={201: OrderSerializer, 400: "Validation Error"}
+    )
     def post(self, request):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
@@ -36,6 +51,10 @@ class ActiveOrdersAPIView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Get a list of active orders (status: P or O)",
+        responses={200: OrderSerializer(many=True)}
+    )
     def get(self, request):
         orders = Order.objects.filter(status__in=['P', 'O'], user=request.user)
         serializer = OrderSerializer(orders, many=True)
@@ -46,19 +65,30 @@ class ComplatedOrdersAPIView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Get a list of completed orders (status: C)",
+        responses={200: OrderSerializer(many=True), 500: "Internal Server Error"}
+    )
     def get(self, request):
         try:
             orders = Order.objects.filter(status__exact='C', user=request.user)
             serializer = OrderSerializer(orders, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response(data={"exp": str(e)})
+            return Response(data={"exp": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UpdateOrderStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Update the status of an order. Status transitions: P -> O -> C",
+        responses={
+            200: "Order status updated",
+            400: "Order already delivered or invalid status"
+        }
+    )
     def get(self, request, pk):
         order = Order.objects.get(pk=pk)
         if order.status == 'P':
@@ -76,6 +106,10 @@ class DeleteOrderAPIView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Delete an order by its ID",
+        responses={204: "Order deleted", 404: "Order not found"}
+    )
     def delete(self, request, pk):
         order = get_object_or_404(Order, pk=pk, user=request.user)
         order.delete()
