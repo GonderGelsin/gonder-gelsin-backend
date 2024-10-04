@@ -12,6 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from fcm_django.models import FCMDevice
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication,
@@ -31,10 +33,14 @@ from .serializers import TokenObtainSerializer, UserSerializer
 
 logger = getLogger()
 
-
 class UserSignUpAPI(APIView):
     permission_classes = []
 
+    @swagger_auto_schema(
+        operation_description="User sign-up endpoint",
+        request_body=UserSerializer,
+        responses={201: 'User Created Successfully', 400: 'Validation Error'}
+    )
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -46,85 +52,76 @@ class UserSignUpAPI(APIView):
 class UserSignInAPI(APIView):
     permission_classes = []
 
+    @swagger_auto_schema(
+        operation_description="User sign-in endpoint",
+        request_body=TokenObtainSerializer,
+        responses={200: 'Authentication Successful', 400: 'Authentication Error'}
+    )
     def post(self, request):
         serializer = TokenObtainSerializer(data=request.data)
         if serializer.is_valid():
-
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            response_data = {'token': token.key,
-                             'user_id': user.pk, 'email': user.email}
+            response_data = {'token': token.key, 'user_id': user.pk, 'email': user.email}
             return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
-
         return CustomErrorResponse(msj={'error': serializer.errors}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordResetRequestAPI(APIView):
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(
+        operation_description="Password reset request endpoint",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'email': openapi.Schema(type=openapi.TYPE_STRING)},
+        ),
+        responses={200: 'Password Reset Email Sent', 404: 'User Not Found'}
+    )
     def post(self, request):
         try:
             email = request.data.get('email')
             user = get_object_or_404(CustomUser, email=email)
-            send_email('Test Subject',
-                       'This is a test email body.', user.email)
-
-            email = EmailMessage('Test', 'Test', to=[
-                                 'umuttopalak@hotmail.com'])
-            email.send()
+            send_email('Test Subject', 'This is a test email body.', user.email)
             return CustomSuccessResponse()
         except Exception as e:
             return Response(data=str(e))
-
-        # if user:
-        #     # Generate token for password reset
-        #     token = default_token_generator.make_token(user)
-
-        #     # Build reset password link
-        #     uid = urlsafe_base64_encode(force_bytes(user.pk))
-        #     reset_link = f"https://gondergelsin.pythonanywhere.com/reset-password/{uid}/{token}/"
-
-        #     # Send reset password email
-        #     subject = "Reset your password"
-        #     message = render_to_string(r'reset_password_email.html', {
-        #         'reset_link': reset_link,
-        #     })
-        #     send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
-
-        #     return CustomSuccessResponse(msj="Password reset link has been sent to your email.", status_code=status.HTTP_200_OK)
-
-        # return CustomErrorResponse(msj="User not found.", status_code=status.HTTP_404_NOT_FOUND)
-
-
-class TestListAPI(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        return Response(data=[], status=status.HTTP_200_OK)
 
 
 class UserDeviceAPI(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    @swagger_auto_schema(
+        operation_description="Get the list of device tokens for the authenticated user",
+        responses={200: 'Device tokens retrieved successfully'}
+    )
     def get(self, request):
         user = request.user
         devices = FCMDevice.objects.filter(user=user)
         device_tokens = [device.registration_id for device in devices]
         return CustomSuccessResponse(input_data={"device_tokens": device_tokens}, status_code=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Register a new device token for the authenticated user",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'device_token': openapi.Schema(type=openapi.TYPE_STRING, description="FCM device token"),
+                'device_type': openapi.Schema(type=openapi.TYPE_STRING, description="Device type (android, ios, web)")
+            }
+        ),
+        responses={200: 'Device token registered successfully', 400: 'Device token is required'}
+    )
     def post(self, request):
         request_data = request.data
         device_token = request_data.get('device_token')
-        device_type = request_data.get(
-            'device_type', 'android')  # or 'ios', 'web'
+        device_type = request_data.get('device_type', 'android')
 
         if not device_token:
             return CustomErrorResponse(input_data={"error": "Device token is required"}, status_code=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-
-        # Check if the device already exists for the user
         device, created = FCMDevice.objects.get_or_create(
             user=user,
             registration_id=device_token,
@@ -132,7 +129,6 @@ class UserDeviceAPI(APIView):
         )
 
         if not created:
-            # If the device already exists, update the type if necessary
             device.type = device_type
             device.save()
 

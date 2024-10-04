@@ -6,6 +6,7 @@ attrs==23.1.0
 autopep8==2.0.2
 boto3==1.28.73
 botocore==1.31.73
+CacheControl==0.14.0
 cachetools==5.3.3
 certifi==2023.5.7
 cffi==1.16.0
@@ -32,8 +33,8 @@ drf-yasg==1.21.5
 email_validator==2.1.1
 et-xmlfile==1.1.0
 Faker==18.9.0
-fastapi==0.111.0
-fastapi-cli==0.0.2
+fcm-django==2.2.1
+firebase-admin==6.5.0
 geographiclib==2.0
 geojson==3.0.1
 geopy==2.4.1
@@ -43,8 +44,15 @@ google-api-python-client==2.131.0
 google-auth==2.29.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
+google-cloud-core==2.4.1
+google-cloud-firestore==2.19.0
+google-cloud-storage==2.18.2
+google-crc32c==1.6.0
+google-resumable-media==2.7.2
 googleapis-common-protos==1.63.0
 greenlet==3.0.1
+grpcio==1.66.2
+grpcio-status==1.62.3
 gunicorn==20.1.0
 h11==0.14.0
 httpcore==1.0.5
@@ -82,8 +90,6 @@ pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycodestyle==2.11.0
 pycparser==2.21
-pydantic==1.10.7
-pydantic_core==2.18.2
 pyfcm==1.5.4
 Pygments==2.17.2
 PyJWT==2.7.0
@@ -114,6 +120,7 @@ social-auth-core==4.5.4
 sqlparse==0.4.4
 starlette==0.37.2
 str2bool==1.1
+swapper==1.4.0
 tomli==2.0.1
 tqdm==4.65.0
 typer==0.12.3
