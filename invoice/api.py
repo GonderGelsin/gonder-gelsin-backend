@@ -25,6 +25,7 @@ from rest_framework.decorators import (api_view, authentication_classes,
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView, status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.utils import CustomErrorResponse, CustomSuccessResponse
@@ -35,7 +36,7 @@ from .serializers import BillingAddressSerializer
 
 class BillingAddressAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(responses={200: BillingAddressSerializer(many=True)})
     def get(self, request):
@@ -44,7 +45,7 @@ class BillingAddressAPI(APIView):
             if not user:
                 return CustomErrorResponse(
                     error_code="USER_NOT_FOUND",
-                    error_message="User not found.",
+                    msj="User not found.",
                     status_code=status.HTTP_401_UNAUTHORIZED
                 )
 
@@ -52,7 +53,7 @@ class BillingAddressAPI(APIView):
             if not addresses.exists():
                 return CustomErrorResponse(
                     error_code="NO_BILLING_ADDRESS_FOUND",
-                    error_message="No billing address found for the user.",
+                    msj="No billing address found for the user.",
                     status_code=status.HTTP_404_NOT_FOUND
                 )
 
@@ -62,13 +63,14 @@ class BillingAddressAPI(APIView):
         except ObjectDoesNotExist:
             return CustomErrorResponse(
                 error_code="OBJECT_NOT_FOUND",
-                error_message="Billing address object not found.",
+                msj="Billing address object not found.",
                 status_code=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
+            print(str(e))
             return CustomErrorResponse(
                 error_code="INTERNAL_SERVER_ERROR",
-                error_message="An internal server error occurred.",
+                msj="An internal server error occurred.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -79,7 +81,7 @@ class BillingAddressAPI(APIView):
             if not user:
                 return CustomErrorResponse(
                     error_code="USER_NOT_FOUND",
-                    error_message="User not found.",
+                    msj="User not found.",
                     status_code=status.HTTP_401_UNAUTHORIZED
                 )
 
@@ -93,21 +95,21 @@ class BillingAddressAPI(APIView):
             else:
                 return CustomErrorResponse(
                     error_code="VALIDATION_ERROR",
-                    error_message=serializer.errors,
+                    msj=serializer.errors,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
 
         except Exception as e:
             return CustomErrorResponse(
                 error_code="INTERNAL_SERVER_ERROR",
-                error_message="An internal server error occurred.",
+                msj="An internal server error occurred.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
 class BillingAddressDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request):
         pass

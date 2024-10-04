@@ -10,6 +10,7 @@ from rest_framework.authentication import (SessionAuthentication,
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView, status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from authentication.models import CustomUser
 from utils.utils import (CustomErrorResponse, CustomSuccessResponse,
@@ -20,7 +21,7 @@ from .serializers import UserProfileSerializer, UserProfileTestSerializer
 
 class UserProfileDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get the authenticated user's profile details",
@@ -67,7 +68,7 @@ class TestAPI(APIView):
 
 class UserNotificationAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get the user's notification preferences (SMS and Email)",
@@ -113,7 +114,7 @@ class UserNotificationAPI(APIView):
 
 class UserLanguageAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get the user's preferred language setting",

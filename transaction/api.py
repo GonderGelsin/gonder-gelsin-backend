@@ -1,9 +1,9 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from utils.utils import CustomErrorResponse, CustomSuccessResponse
 
@@ -13,7 +13,7 @@ from .serializers import TransactionSerializer
 
 class TransactionAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get a list of transactions for the authenticated user",
@@ -41,7 +41,7 @@ class TransactionAPI(APIView):
 
 class TransactionDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get details of a specific transaction by its ID",
