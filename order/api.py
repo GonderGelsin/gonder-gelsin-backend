@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Order
 from .serializers import OrderSerializer
@@ -14,7 +15,7 @@ from .serializers import OrderSerializer
 
 class OrderListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get a list of orders with optional filters",
@@ -49,7 +50,7 @@ class OrderListCreateAPIView(APIView):
 
 class ActiveOrdersAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get a list of active orders (status: P or O)",
@@ -63,7 +64,7 @@ class ActiveOrdersAPIView(APIView):
 
 class ComplatedOrdersAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get a list of completed orders (status: C)",
@@ -80,7 +81,7 @@ class ComplatedOrdersAPIView(APIView):
 
 class UpdateOrderStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Update the status of an order. Status transitions: P -> O -> C",
@@ -104,7 +105,7 @@ class UpdateOrderStatusAPIView(APIView):
 
 class DeleteOrderAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Delete an order by its ID",

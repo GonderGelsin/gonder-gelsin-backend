@@ -16,14 +16,14 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from fcm_django.models import FCMDevice
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes,
                                        permission_classes)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView, status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.utils import CustomErrorResponse, CustomSuccessResponse, send_email
@@ -61,11 +61,18 @@ class UserSignInAPI(APIView):
         serializer = TokenObtainSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            token, created = Token.objects.get_or_create(user=user)
-            response_data = {'token': token.key, 'user_id': user.pk, 'email': user.email}
+            
+            refresh = RefreshToken.for_user(user)
+            response_data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user_id': user.pk,
+                'email': user.email
+            }
+            
             return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
-        return CustomErrorResponse(msj={'error': serializer.errors}, status_code=status.HTTP_400_BAD_REQUEST)
 
+        return CustomErrorResponse(msj={'error': serializer.errors}, status_code=status.HTTP_400_BAD_REQUEST)
 
 class PasswordResetRequestAPI(APIView):
     permission_classes = [AllowAny]
@@ -90,7 +97,7 @@ class PasswordResetRequestAPI(APIView):
 
 class UserDeviceAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get the list of device tokens for the authenticated user",

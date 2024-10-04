@@ -10,10 +10,10 @@ from drf_yasg.utils import swagger_auto_schema
 from fcm_django.models import FCMDevice
 from pyfcm import FCMNotification
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from authentication.models import CustomUser
 from utils.utils import CustomErrorResponse, CustomSuccessResponse
@@ -26,7 +26,7 @@ logger = getLogger("my_logger")
 
 class NotificationListCreate(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get the list of notifications for the authenticated user",
@@ -52,7 +52,7 @@ class NotificationListCreate(APIView):
 
 class NotificationDetail(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Get a specific notification by its ID",
@@ -95,7 +95,7 @@ class NotificationDetail(APIView):
 
 class NotificationRead(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Mark a notification as read",
@@ -123,7 +123,7 @@ class NotificationRead(APIView):
 
 class SendNotificationAPI(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
         operation_description="Send a notification to the user's registered devices",
