@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .api import (TestAPI, UserLanguageAPI, UserNotificationAPI,
+from .api import (CheckUserAPI, TestAPI, UserLanguageAPI, UserNotificationAPI,
                   UserProfileDetailAPI)
 
 urlpatterns = [
@@ -8,6 +8,6 @@ urlpatterns = [
     path("users/", TestAPI.as_view()),
     path("notification/preferences/", UserNotificationAPI.as_view()),
     path("language/", UserLanguageAPI.as_view()),
-
+    path("check-user/", CheckUserAPI.as_view()),
 
 ]

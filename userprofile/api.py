@@ -2,6 +2,7 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Q
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -40,11 +41,13 @@ class UserProfileDetailAPI(APIView):
     @swagger_auto_schema(
         operation_description="Update the authenticated user's profile details",
         request_body=UserProfileSerializer,
-        responses={200: "Profile updated successfully", 400: "Validation error"}
+        responses={200: "Profile updated successfully",
+                   400: "Validation error"}
     )
     def put(self, request):
         request_data = request.data
-        serializer = UserProfileSerializer(instance=request.user, data=request_data, partial=True)
+        serializer = UserProfileSerializer(
+            instance=request.user, data=request_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return CustomSuccessResponse(status_code=status.HTTP_200_OK)
@@ -151,3 +154,18 @@ class UserLanguageAPI(APIView):
 
         user.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class CheckUserAPI(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        request_params = request.query_params.dict()
+        if 'email' in request_params and request_params['email']:
+            user = CustomUser.objects.filter(
+                Q(email__exact=request_params['email'])).first()
+            if user:
+                return CustomSuccessResponse(input_data=True, status_code=status.HTTP_200_OK)
+            return CustomSuccessResponse(input_data=False, status_code=status.HTTP_200_OK)
+        return CustomErrorResponse(error_code=status.HTTP_502_BAD_GATEWAY)
