@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
 from .api import (PasswordResetRequestAPI, UserDeviceAPI, UserSignInAPI,
-                  UserSignUpAPI)
+                  UserSignUpAPI, google_sign_in)
 
 urlpatterns = [
     path('register/', UserSignUpAPI.as_view()),
@@ -11,5 +11,6 @@ urlpatterns = [
     path('revoke-token/', TokenRefreshView.as_view()),
     path('reset-password/', PasswordResetRequestAPI.as_view()),
     path('device-token/', UserDeviceAPI.as_view()),
+    path('google/login/', google_sign_in),
 
 ]
