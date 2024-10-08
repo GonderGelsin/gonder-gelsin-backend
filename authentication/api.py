@@ -203,7 +203,7 @@ def google_sign_in(request):
                 'user_id': user.pk,
                 'email': user.email,
             }
-
+            logger.warning(response_data)
             return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
         return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
         
