@@ -181,12 +181,16 @@ class UserDeviceAPI(APIView):
 def google_sign_in(request):
     try:
         id_token_received = request.data.get('id_token')
-
+        client_id = request.data.get('client_id')
+        
         if not id_token_received:
             return Response({'error': 'id_token is required'}, status=status.HTTP_400_BAD_REQUEST)
         
+        if not client_id:
+            return Response({'error': 'client_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         idinfo = id_token.verify_oauth2_token(
-            id_token_received, google_requests.Request(), settings.GOOGLE_CLIENT_ID)
+            id_token_received, google_requests.Request(), client_id)
 
         if 'email' not in idinfo:
             return Response({'error': 'Google token does not contain email'}, status=status.HTTP_400_BAD_REQUEST)
