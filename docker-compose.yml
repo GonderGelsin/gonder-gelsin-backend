@@ -23,8 +23,6 @@ services:
       - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN}
     ports:
       - "8000:8000"
-    depends_on:
-      - postgres-db
     command: >
       sh -c "
       python manage.py migrate && 
