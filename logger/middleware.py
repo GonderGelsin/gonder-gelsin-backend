@@ -22,7 +22,6 @@ class RequestResponseLogMiddleware:
         '/site.webmanifest/',
         '/apple-touch-icon.png/',
         '/apple-touch-icon-precomposed.png/',
-        '/',
     ]
 
     def __init__(self, get_response):

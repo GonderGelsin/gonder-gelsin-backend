@@ -30,31 +30,40 @@ class RequestLogAPI(APIView):
     ordering = ['-timestamp']
     pagination_class = CustomPagination
 
+    # Filter backend için gerekli metodlar
+    def get_queryset(self):
+        return RequestLog.objects.all()
+
+    def get_serializer_class(self):
+        return RequestLogSerializer
+
+    def filter_queryset(self, queryset):
+        for backend in self.filter_backends:
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
+
     @swagger_auto_schema(
         operation_description="Get all request logs with filtering options",
         manual_parameters=[
             openapi.Parameter('method', openapi.IN_QUERY,
-                              description="Filter by HTTP method", type=openapi.TYPE_STRING),
+                            description="Filter by HTTP method", type=openapi.TYPE_STRING),
             openapi.Parameter('status_code', openapi.IN_QUERY,
-                              description="Filter by status code", type=openapi.TYPE_INTEGER),
+                            description="Filter by status code", type=openapi.TYPE_INTEGER),
             openapi.Parameter('search', openapi.IN_QUERY,
-                              description="Search in path and error message", type=openapi.TYPE_STRING),
+                            description="Search in path and error message", type=openapi.TYPE_STRING),
             openapi.Parameter('ordering', openapi.IN_QUERY,
-                              description="Order by field (e.g. -timestamp)", type=openapi.TYPE_STRING),
+                            description="Order by field (e.g. -timestamp)", type=openapi.TYPE_STRING),
         ],
         responses={200: RequestLogSerializer(many=True)}
     )
     def get(self, request):
         try:
-            queryset = RequestLog.objects.all()
-
-            for backend in self.filter_backends:
-                queryset = backend().filter_queryset(request, queryset, self)
+            queryset = self.filter_queryset(self.get_queryset())
 
             paginator = self.pagination_class()
             page = paginator.paginate_queryset(queryset, request)
 
-            serializer = RequestLogSerializer(page, many=True)
+            serializer = self.get_serializer_class()(page, many=True)
 
             pagination_meta = {
                 'count': paginator.page.paginator.count,
