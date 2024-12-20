@@ -17,3 +17,4 @@ jobs:
           username: "gondergelsin"
           api_token: "9c90e9e9b9501d6dace110d909769aa256995e3f"
           domain_name: "gondergelsin.pythonanywhere.com"
+          framework_type: "django
