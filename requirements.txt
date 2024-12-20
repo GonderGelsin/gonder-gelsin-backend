@@ -23,6 +23,7 @@ dj-database-url==2.0.0
 Django==4.2.7
 django-cognito-jwt==0.0.4
 django-cors-headers==4.2.0
+django-filter==24.3
 django-redis==5.4.0
 django-rest-swagger==2.2.0
 django-storages==1.13.2
@@ -41,9 +42,9 @@ geopy==2.4.1
 gevent==23.9.1
 google-api-core==2.19.0
 google-api-python-client==2.131.0
-google-auth==2.29.0
+google-auth==2.35.0
 google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.0
+google-auth-oauthlib==1.2.1
 google-cloud-core==2.4.1
 google-cloud-firestore==2.19.0
 google-cloud-storage==2.18.2
@@ -93,6 +94,7 @@ pycparser==2.21
 pyfcm==1.5.4
 Pygments==2.17.2
 PyJWT==2.7.0
+PyMySQL==1.1.1
 pyparsing==3.1.2
 pytest==7.4.0
 pytest-cov==4.1.0

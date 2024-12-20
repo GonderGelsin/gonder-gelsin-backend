@@ -14,6 +14,15 @@ class RequestResponseLogMiddleware:
         '/swagger/',
         '/redoc/',
         '/api/schema/',
+        '/favicon.ico/',
+        '/robots.txt/',
+        '/sitemap.xml/',
+        '/favicon-32x32.png/',
+        '/favicon-16x16.png/',
+        '/site.webmanifest/',
+        '/apple-touch-icon.png/',
+        '/apple-touch-icon-precomposed.png/',
+        '/',
     ]
 
     def __init__(self, get_response):
