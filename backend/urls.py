@@ -47,5 +47,6 @@ urlpatterns = [
     path("transaction/", include('transaction.urls')),
     path("order/", include('order.urls')),
     path("invoice/", include('invoice.urls')),
+    path('logger/', include('logger.urls')),
 
 ]
