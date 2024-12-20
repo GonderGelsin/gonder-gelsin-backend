@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'order',
     'invoice',
     'fcm_django',
+    'logger',
 ]
 
 MIDDLEWARE = [
@@ -104,6 +105,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'logger.middleware.RequestResponseLogMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
