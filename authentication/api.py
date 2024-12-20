@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from drf_yasg import openapi
@@ -197,25 +198,38 @@ def google_sign_in(request):
 
         email = idinfo['email']
         user = CustomUser.objects.filter(email=email).first()
-        print(email)
-        print(user)
-        if user:
-            refresh = RefreshToken.for_user(user)
-            response_data = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user_id': user.pk,
-                'email': user.email,
-            }
-            logger.warning(response_data)
-            return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
-        return CustomErrorResponse(status_code=status.HTTP_400_BAD_REQUEST)
+
+        if not user:
+            first_name = idinfo.get('given_name', '')
+            last_name = idinfo.get('family_name', '')
+            
+            username = email.split('@')[0] + ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+            
+            user = CustomUser.objects.create_user(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password=''.join(random.choices(string.ascii_letters + string.digits, k=12))
+            )
+            user.is_active = True
+            user.save()
+
+        refresh = RefreshToken.for_user(user)
+        response_data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user_id': user.pk,
+            'email': user.email,
+            'is_new_user': not bool(user.last_login),
+        }
+        
+        user.last_login = timezone.now()
+        user.save()
+
+        logger.warning(response_data)
+        return CustomSuccessResponse(input_data=response_data, status_code=status.HTTP_200_OK)
         
     except Exception as e:
         logger.warning(str(e))
         return CustomErrorResponse(msj=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    # except ValueError as e:
-    #     return Response({'error': f"Invalid token : {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # except Exception as e:
-    #     return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
