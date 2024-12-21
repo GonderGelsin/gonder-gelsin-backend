@@ -30,29 +30,45 @@ class RequestResponseLogMiddleware:
     def should_log_request(self, path: str) -> bool:
         return not any(path.startswith(excluded) for excluded in self.EXCLUDED_PATHS)
 
+    def get_request_body(self, request):
+        try:
+            if request.body:
+                if isinstance(request.body, bytes):
+                    return json.loads(request.body.decode('utf-8'))
+                return json.loads(request.body)
+        except json.JSONDecodeError:
+            if hasattr(request, 'POST'):
+                return dict(request.POST.items())
+        return None
+
+    def get_response_body(self, response):
+        try:
+            if hasattr(response, 'content'):
+                if isinstance(response.content, bytes):
+                    return json.loads(response.content.decode('utf-8'))
+                return json.loads(response.content)
+        except json.JSONDecodeError:
+            if hasattr(response, 'data'):
+                return response.data
+        return None
+
     def __call__(self, request: HttpRequest) -> HttpResponse:
         if not self.should_log_request(request.path):
             return self.get_response(request)
 
         start_time = time.time()
 
-        request_body = None
-        if request.body:
-            try:
-                request_body = json.loads(request.body)
-            except json.JSONDecodeError:
-                request_body = request.body.decode('utf-8')
-
+        request_body = self.get_request_body(request)
         response = self.get_response(request)
-
-        response_body = None
-        if hasattr(response, 'content'):
-            try:
-                response_body = json.loads(response.content)
-            except json.JSONDecodeError:
-                response_body = response.content.decode('utf-8')
-
+        response_body = self.get_response_body(response)
         duration = time.time() - start_time
+
+        # Hassas verileri maskele
+        if request_body and isinstance(request_body, dict):
+            if 'password' in request_body:
+                request_body['password'] = '********'
+            if 'id_token' in request_body:
+                request_body['id_token'] = '********'
 
         RequestLog.objects.create(
             path=request.path,
