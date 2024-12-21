@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   django-app:
     build:
@@ -27,10 +25,9 @@ services:
       sh -c "
       python manage.py migrate && 
       python manage.py collectstatic --noinput && 
-      gunicorn -b 0.0.0.0:9000 myproject.wsgi:application
+      gunicorn -b 0.0.0.0:8000 myproject.wsgi:application
       "
     restart: always
-
 
 volumes:
   db_data:
