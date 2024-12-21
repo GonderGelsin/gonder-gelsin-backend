@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   django-app:
     build:
@@ -5,28 +7,54 @@ services:
       dockerfile: Dockerfile
     container_name: django-app
     environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - EMAIL_PORT=${EMAIL_PORT}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
-      - SERVER_KEY=${SERVER_KEY}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
+      SERVER_KEY: ${SERVER_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+      DJANGO_ALLOWED_HOSTS: "gondergelsin.umuttopalak.com,localhost,127.0.0.1"
     ports:
       - "8000:8000"
+    volumes:
+      - static_data:/app/staticfiles
+      - media_data:/app/media
     command: >
       sh -c "
-      python manage.py migrate && 
+      python manage.py migrate &&
       gunicorn -b 0.0.0.0:8000 backend.wsgi:application
       "
     restart: always
+    depends_on:
+      - db
+    networks:
+      - django-network
+
+  db:
+    image: postgres:15
+    container_name: django-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - django-network
 
 volumes:
   db_data:
+  static_data:
+  media_data:
+
+networks:
+  django-network:
+    driver: bridge
