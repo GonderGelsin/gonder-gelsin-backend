@@ -15,9 +15,12 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import pymysql
 from django.conf import settings
 from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app
+
+pymysql.install_as_MySQLdb()
 
 load_dotenv()
 
