@@ -24,8 +24,7 @@ services:
     command: >
       sh -c "
       python manage.py migrate && 
-      python manage.py collectstatic --noinput && 
-      gunicorn -b 0.0.0.0:8000 myproject.wsgi:application
+      gunicorn -b 0.0.0.0:8000 backend.wsgi:application
       "
     restart: always
 
