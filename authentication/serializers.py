@@ -34,3 +34,34 @@ class TokenObtainSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+
+
+class UserCompleteProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['phone_number', 'turkish_id_number', 'password']
+
+    def validate_turkish_id_number(self, value):
+        if not value.isdigit() or len(value) != 11:
+            raise serializers.ValidationError("Turkish ID number must be 11 digits")
+        return value
+
+    def validate_phone_number(self, value):
+        if not value.startswith('+') or not value[1:].isdigit():
+            raise serializers.ValidationError("Phone number must start with '+' followed by digits")
+        return value
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        
+        # Önce diğer alanları güncelle
+        instance = super().update(instance, validated_data)
+        
+        # Şifreyi güncelle
+        if password:
+            instance.set_password(password)
+            instance.save()
+        
+        return instance

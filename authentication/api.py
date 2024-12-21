@@ -34,7 +34,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from utils.utils import CustomErrorResponse, CustomSuccessResponse, send_email
 
 from .models import CustomUser
-from .serializers import TokenObtainSerializer, UserSerializer
+from .serializers import (TokenObtainSerializer, UserCompleteProfileSerializer,
+                          UserSerializer)
 
 logger = getLogger()
 
@@ -213,6 +214,7 @@ def google_sign_in(request):
                 password=''.join(random.choices(string.ascii_letters + string.digits, k=12))
             )
             user.is_active = True
+            user.is_new_user = True
             user.save()
 
         refresh = RefreshToken.for_user(user)
@@ -221,7 +223,7 @@ def google_sign_in(request):
             'access': str(refresh.access_token),
             'user_id': user.pk,
             'email': user.email,
-            'is_new_user': not bool(user.last_login),
+            'is_new_user': user.is_new_user
         }
         
         user.last_login = timezone.now()
@@ -233,3 +235,55 @@ def google_sign_in(request):
     except Exception as e:
         logger.warning(str(e))
         return CustomErrorResponse(msj=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CompleteProfileAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        operation_description="Complete user profile for new Google users",
+        request_body=UserCompleteProfileSerializer,
+        responses={
+            200: 'Profile Updated Successfully',
+            400: 'Validation Error',
+            403: 'Profile Already Complete'
+        }
+    )
+    def post(self, request):
+        user = request.user
+        
+        if not user.is_new_user:
+            return CustomErrorResponse(
+                msj="Profile is already complete",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = UserCompleteProfileSerializer(user, data=request.data)
+        
+        if serializer.is_valid():
+            user = serializer.save()
+            user.is_new_user = False 
+            user.save()
+
+            # Yeni token oluştur (şifre değiştiği için)
+            refresh = RefreshToken.for_user(user)
+            response_data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user_id': user.pk,
+                'email': user.email,
+                'phone_number': user.phone_number,
+                'turkish_id_number': user.turkish_id_number
+            }
+            
+            return CustomSuccessResponse(
+                input_data=response_data,
+                msj="Profile completed successfully",
+                status_code=status.HTTP_200_OK
+            )
+            
+        return CustomErrorResponse(
+            msj=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
