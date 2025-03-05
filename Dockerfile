@@ -23,5 +23,5 @@ ENV DJANGO_SETTINGS_MODULE=backend.settings
 # Uygulama portunu aç
 EXPOSE 8000
 
-# Varsayılan çalışma komutu
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Migration ve sunucu başlatma komutlarını birleştir
+CMD bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"

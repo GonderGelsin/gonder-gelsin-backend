@@ -16,12 +16,9 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-import pymysql
 from django.conf import settings
 from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app
-
-pymysql.install_as_MySQLdb()
 
 load_dotenv()
 
@@ -136,21 +133,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': os.environ.get('DB_NAME'),
-#         'USER': os.environ.get('DB_USER'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD'),
-#         'HOST': os.environ.get('DB_HOST'),
-#     }
-# }
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -194,21 +184,6 @@ LOGGING = {
     },
 }
 
-
-# Replace with environment variable based configuration
-# firebase_credentials = {
-#     "type": os.environ.get("FIREBASE_TYPE"),
-#     "project_id": os.environ.get("FIREBASE_PROJECT_ID"),
-#     "private_key_id": os.environ.get("FIREBASE_PRIVATE_KEY_ID"),
-#     "private_key": os.environ.get("FIREBASE_PRIVATE_KEY", "").replace("\\n", "\n"),
-#     "client_email": os.environ.get("FIREBASE_CLIENT_EMAIL"),
-#     "client_id": os.environ.get("FIREBASE_CLIENT_ID"),
-#     "auth_uri": os.environ.get("FIREBASE_AUTH_URI"),
-#     "token_uri": os.environ.get("FIREBASE_TOKEN_URI"),
-#     "auth_provider_x509_cert_url": os.environ.get("FIREBASE_AUTH_PROVIDER_CERT_URL"),
-#     "client_x509_cert_url": os.environ.get("FIREBASE_CLIENT_CERT_URL"),
-#     "universe_domain": os.environ.get("FIREBASE_UNIVERSE_DOMAIN")
-# }
 
 # Firebase configuration - Base64 encoded JSON
 firebase_credentials_base64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
