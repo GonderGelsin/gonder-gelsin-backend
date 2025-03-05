@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import base64
 import json
 import os
 from datetime import timedelta
@@ -209,11 +210,17 @@ LOGGING = {
 #     "universe_domain": os.environ.get("FIREBASE_UNIVERSE_DOMAIN")
 # }
 
-# Firebase configuration - JSON string'den direkt okuma
-firebase_credentials = os.environ.get("FIREBASE_CREDENTIALS")
-firebase_credentials_dict = json.loads(firebase_credentials)
-cred = credentials.Certificate(firebase_credentials_dict)
-FIREBASE_APP = initialize_app(credential=cred)
+# Firebase configuration - Base64 encoded JSON
+firebase_credentials_base64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
+try:
+    # Base64'ten decode et, sonra JSON olarak parse et
+    decoded_creds = base64.b64decode(firebase_credentials_base64).decode('utf-8')
+    firebase_credentials_dict = json.loads(decoded_creds)
+    cred = credentials.Certificate(firebase_credentials_dict)
+    FIREBASE_APP = initialize_app(credential=cred)
+except Exception as e:
+    print(f"Firebase credentials error: {e}")
+    raise e
 
 FCM_DJANGO_SETTINGS = {
     "DEFAULT_FIREBASE_APP": FIREBASE_APP,
