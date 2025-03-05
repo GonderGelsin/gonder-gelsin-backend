@@ -209,6 +209,7 @@ LOGGING = {
 #     "universe_domain": os.environ.get("FIREBASE_UNIVERSE_DOMAIN")
 # }
 
+# Firebase configuration - JSON string'den direkt okuma
 firebase_credentials = os.environ.get("FIREBASE_CREDENTIALS")
 firebase_credentials_dict = json.loads(firebase_credentials)
 cred = credentials.Certificate(firebase_credentials_dict)
