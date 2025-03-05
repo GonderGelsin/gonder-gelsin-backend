@@ -35,4 +35,4 @@ jobs:
 
       - name: Update Kubernetes deployment
         run: |
-          kubectl set image deployment/vibrater-api vibrater-api=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_APP_NAME }}:${{ github.sha }} -n ${{ secrets.KUBE_NAMESPACE }}
+          kubectl set image deployment/gondergelsin-api gondergelsin-api=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_APP_NAME }}:${{ github.sha }} -n ${{ secrets.KUBE_NAMESPACE }}
