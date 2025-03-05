@@ -133,16 +133,27 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+DB_ENGINE = os.environ.get('DB_ENGINE', 'postgresql')
+
+if DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT'),
+        }
+    }
 
 LOGGING = {
     'version': 1,
@@ -189,7 +200,8 @@ LOGGING = {
 firebase_credentials_base64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
 try:
     # Base64'ten decode et, sonra JSON olarak parse et
-    decoded_creds = base64.b64decode(firebase_credentials_base64).decode('utf-8')
+    decoded_creds = base64.b64decode(
+        firebase_credentials_base64).decode('utf-8')
     firebase_credentials_dict = json.loads(decoded_creds)
     cred = credentials.Certificate(firebase_credentials_dict)
     FIREBASE_APP = initialize_app(credential=cred)
