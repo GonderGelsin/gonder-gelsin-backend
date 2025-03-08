@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path
@@ -56,8 +57,8 @@ def swagger_redirect(request):
 
 urlpatterns = [
     path('', swagger_redirect, name='swagger-redirect'),
-    path('swagger/', csrf_exempt(public_schema_view.with_ui('swagger', cache_timeout=0)), name='schema-swagger-ui'),
-    path('redoc/', csrf_exempt(public_schema_view.with_ui('redoc', cache_timeout=0)), name='schema-redoc'),
+    path('swagger/', public_schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', public_schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('health-check/', HealthCheckAPI.as_view(), name='health-check'),
 
     path('admin/', admin.site.urls),
@@ -70,3 +71,7 @@ urlpatterns = [
     path('logger/', include('logger.urls')),
 
 ]
+
+# Add static file serving for production
+if not settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

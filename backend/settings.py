@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',  # Add WhiteNoise for development server
     'django.contrib.staticfiles',
 
     'rest_framework',
@@ -104,7 +105,8 @@ class BypassAuthMiddleware:
 
     def __call__(self, request):
         path = request.path
-        if path.startswith('/swagger') or path.startswith('/redoc'):
+        # Allow Swagger UI and static file access without authentication
+        if path.startswith('/swagger') or path.startswith('/redoc') or path.startswith('/static/'):
             # Mark the request as authenticated for these paths
             setattr(request, '_dont_enforce_csrf_checks', True)
             setattr(request, '_bypass_auth', True)
@@ -113,6 +115,7 @@ class BypassAuthMiddleware:
 MIDDLEWARE = [
     'backend.settings.BypassAuthMiddleware',  # Add custom middleware at the start
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -277,7 +280,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Add this to ensure drf-yasg static files are properly collected
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -298,5 +307,18 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization',
             'in': 'header'
         }
-    }
+    },
+    'VALIDATOR_URL': None,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
+    'DEFAULT_MODEL_RENDERING': 'model',
+    'OPERATIONS_SORTER': 'alpha',
+    'PERSIST_AUTH': True,
+    'DEEP_LINKING': True,
 }
+
+# WhiteNoise Configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
+WHITENOISE_INDEX_FILE = True
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
