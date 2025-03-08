@@ -14,15 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from .api import HealthCheckAPI
 
-schema_view = get_schema_view(
+# Create a more explicit schema view with stronger public access settings
+public_schema_view = get_schema_view(
     openapi.Info(
         title="API",
         default_version='v1',
@@ -32,16 +37,27 @@ schema_view = get_schema_view(
         license=openapi.License(name="BSD License"),
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
-    authentication_classes=(),
+    permission_classes=[permissions.AllowAny],
+    authentication_classes=[],
 )
 
+# Create custom view to redirect to Swagger UI
+def swagger_redirect(request):
+    return HttpResponse("""
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="0;URL='/swagger/'" />
+        </head>
+        <body>
+            <p>Redirecting to Swagger UI...</p>
+        </body>
+    </html>
+    """)
 
 urlpatterns = [
-    path('swagger/', schema_view.with_ui('swagger',
-         cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc',
-         cache_timeout=0), name='schema-redoc'),
+    path('', swagger_redirect, name='swagger-redirect'),
+    path('swagger/', csrf_exempt(public_schema_view.with_ui('swagger', cache_timeout=0)), name='schema-swagger-ui'),
+    path('redoc/', csrf_exempt(public_schema_view.with_ui('redoc', cache_timeout=0)), name='schema-redoc'),
     path('health-check/', HealthCheckAPI.as_view(), name='health-check'),
 
     path('admin/', admin.site.urls),
