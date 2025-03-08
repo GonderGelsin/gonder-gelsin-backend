@@ -47,7 +47,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
@@ -97,15 +97,29 @@ INSTALLED_APPS = [
     'logger',
 ]
 
+# Create a custom middleware to bypass authentication for Swagger
+class BypassAuthMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        path = request.path
+        if path.startswith('/swagger') or path.startswith('/redoc'):
+            # Mark the request as authenticated for these paths
+            setattr(request, '_dont_enforce_csrf_checks', True)
+            setattr(request, '_bypass_auth', True)
+        return self.get_response(request)
+
 MIDDLEWARE = [
+    'backend.settings.BypassAuthMiddleware',  # Add custom middleware at the start
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'logger.middleware.RequestResponseLogMiddleware',
 ]
 
@@ -272,3 +286,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
+
+# Swagger Settings
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': None,
+    'LOGOUT_URL': None,
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
