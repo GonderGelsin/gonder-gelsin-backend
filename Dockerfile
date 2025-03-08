@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Uygulama kodunu kopyala
 COPY . /app/
 
+# Static dizini oluştur
+RUN mkdir -p /app/static
+
 # Django ayarlarını belirle
 ENV DJANGO_SETTINGS_MODULE=backend.settings
 
@@ -24,4 +27,4 @@ ENV DJANGO_SETTINGS_MODULE=backend.settings
 EXPOSE 8000
 
 # Migration ve sunucu başlatma komutlarını birleştir
-CMD bash -c "python manage.py migrate && uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
+CMD bash -c "python manage.py migrate && python manage.py collectstatic --noinput && uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
