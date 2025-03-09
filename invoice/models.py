@@ -5,6 +5,7 @@ from authentication.models import CustomUser
 
 
 class BillingAddress(models.Model):
+    alias = models.CharField(_('alias'), null=False, default="", max_length=50)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='billing_addresses')
     address_line_1 = models.CharField(_('address line 1'), max_length=255)
     address_line_2 = models.CharField(
