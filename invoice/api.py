@@ -203,3 +203,53 @@ class BillingAddressDetailAPI(APIView):
                 msj="An internal server error occurred.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+from drf_yasg import openapi
+
+
+class BillingAddressSetDefaultAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'pk', openapi.IN_PATH,
+                description="Billing address primary key",
+                type=openapi.TYPE_INTEGER
+            )
+        ],
+        responses={200: BillingAddressSerializer()}
+    )
+    def get(self, request, pk):
+        try:
+            user = request.user
+            # İlgili fatura adresini, kullanıcının kayıtları arasından getir.
+            billing_address = get_object_or_404(BillingAddress, pk=pk, user=user)
+
+            # Kullanıcının tüm fatura adreslerinin is_default değerini False yap.
+            BillingAddress.objects.filter(user=user).update(is_default=False)
+
+            # Seçilen adresi varsayılan olarak işaretle.
+            billing_address.is_default = True
+            billing_address.save()
+
+            serializer = BillingAddressSerializer(billing_address)
+            return CustomSuccessResponse(
+                input_data={"data": serializer.data},
+                status_code=status.HTTP_200_OK
+            )
+        except ObjectDoesNotExist:
+            return CustomErrorResponse(
+                error_code="BILLING_ADDRESS_NOT_FOUND",
+                msj="Billing address not found.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(str(e))
+            return CustomErrorResponse(
+                error_code="INTERNAL_SERVER_ERROR",
+                msj="An internal server error occurred.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
