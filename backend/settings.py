@@ -99,6 +99,8 @@ INSTALLED_APPS = [
 ]
 
 # Create a custom middleware to bypass authentication for Swagger
+
+
 class BypassAuthMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -111,6 +113,7 @@ class BypassAuthMiddleware:
             setattr(request, '_dont_enforce_csrf_checks', True)
             setattr(request, '_bypass_auth', True)
         return self.get_response(request)
+
 
 MIDDLEWARE = [
     'backend.settings.BypassAuthMiddleware',  # Add custom middleware at the start
@@ -218,10 +221,12 @@ firebase_credentials_base64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
 try:
     # Base64'ten decode et, sonra JSON olarak parse et
     # Padding'i düzeltmek için eksik "=" karakterleri ekliyoruz
-    padding = 4 - (len(firebase_credentials_base64) % 4) if len(firebase_credentials_base64) % 4 != 0 else 0
+    padding = 4 - (len(firebase_credentials_base64) %
+                   4) if len(firebase_credentials_base64) % 4 != 0 else 0
     firebase_credentials_base64_padded = firebase_credentials_base64 + "=" * padding
-    
-    decoded_creds = base64.b64decode(firebase_credentials_base64_padded).decode('utf-8')
+
+    decoded_creds = base64.b64decode(
+        firebase_credentials_base64_padded).decode('utf-8')
     firebase_credentials_dict = json.loads(decoded_creds)
     cred = credentials.Certificate(firebase_credentials_dict)
     FIREBASE_APP = initialize_app(credential=cred)
@@ -257,6 +262,7 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REFRESH_TOKEN = os.environ.get('GOOGLE_REFRESH_TOKEN')
 
+X_API_KEY = os.environ.get('X_API_KEY')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -335,4 +341,3 @@ WHITENOISE_USE_FINDERS = True
 WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
 WHITENOISE_INDEX_FILE = True
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-X_API_KEY = "TEST"

@@ -44,6 +44,8 @@ public_schema_view = get_schema_view(
 )
 
 # Create custom view to redirect to Swagger UI
+
+
 def swagger_redirect(request):
     return HttpResponse("""
     <html>
@@ -56,16 +58,18 @@ def swagger_redirect(request):
     </html>
     """)
 
+
 urlpatterns = [
     path('', swagger_redirect, name='swagger-redirect'),
-    path('swagger/', public_schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', public_schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('swagger/', public_schema_view.with_ui('swagger',cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', public_schema_view.with_ui('redoc',cache_timeout=0), name='schema-redoc'),
     path('health-check/', HealthCheckAPI.as_view(), name='health-check'),
 
     path('admin/', admin.site.urls),
     path('authentication/', include('authentication.urls')),
     path('user/', include('userprofile.urls')),
-    path('user/notification/', include('notification.urls')),
+    path('user/notification/', include('notification.user_urls')),
+    path('notification/', include('notification.urls')),
     path("transaction/", include('transaction.urls')),
     path("order/", include('order.urls')),
     path("invoice/", include('invoice.urls')),
@@ -75,4 +79,5 @@ urlpatterns = [
 
 # Add static file serving for production
 if not settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
