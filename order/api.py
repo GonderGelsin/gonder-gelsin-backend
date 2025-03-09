@@ -46,6 +46,19 @@ class OrderListCreateAPIView(APIView):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class OrderDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    @swagger_auto_schema(
+        operation_description="Retrieve an order",
+        responses={200: OrderSerializer, 400: "Not Found"})
+    def get(self, request, pk):
+        order = get_object_or_404(Order, pk=pk, user=request.user)
+        serializer = OrderSerializer(order, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ActiveOrdersAPIView(APIView):
