@@ -111,11 +111,95 @@ class BillingAddressDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
-        pass
+    def get_object(self, pk, user):
+        # Verilen pk ve kullanıcıya ait fatura adresini getirir, yoksa 404 hatası döner.
+        return get_object_or_404(BillingAddress, pk=pk, user=user)
 
-    def put(self, request):
-        pass
+    @swagger_auto_schema(
+        responses={200: BillingAddressSerializer()}
+    )
+    def get(self, request, pk):
+        try:
+            user = request.user
+            billing_address = self.get_object(pk, user)
+            serializer = BillingAddressSerializer(billing_address)
+            return CustomSuccessResponse(
+                input_data={"data": serializer.data},
+                status_code=status.HTTP_200_OK
+            )
+        except ObjectDoesNotExist:
+            return CustomErrorResponse(
+                error_code="BILLING_ADDRESS_NOT_FOUND",
+                msj="Billing address not found.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(str(e))
+            return CustomErrorResponse(
+                error_code="INTERNAL_SERVER_ERROR",
+                msj="An internal server error occurred.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-    def delete(self, request):
-        pass
+    @swagger_auto_schema(
+        request_body=BillingAddressSerializer,
+        responses={200: BillingAddressSerializer()}
+    )
+    def put(self, request, pk):
+        try:
+            user = request.user
+            billing_address = self.get_object(pk, user)
+            serializer = BillingAddressSerializer(
+                billing_address, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return CustomSuccessResponse(
+                    input_data={"data": serializer.data},
+                    status_code=status.HTTP_200_OK
+                )
+            else:
+                return CustomErrorResponse(
+                    error_code="VALIDATION_ERROR",
+                    msj=serializer.errors,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+        except ObjectDoesNotExist:
+            return CustomErrorResponse(
+                error_code="BILLING_ADDRESS_NOT_FOUND",
+                msj="Billing address not found.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(str(e))
+            return CustomErrorResponse(
+                error_code="INTERNAL_SERVER_ERROR",
+                msj="An internal server error occurred.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @swagger_auto_schema(
+        responses={204: "Billing address deleted successfully."}
+    )
+    def delete(self, request, pk):
+        try:
+            user = request.user
+            billing_address = self.get_object(pk, user)
+            billing_address.delete()
+            return CustomSuccessResponse(
+                input_data={
+                    "message": "Billing address deleted successfully."},
+                status_code=status.HTTP_204_NO_CONTENT
+            )
+        except ObjectDoesNotExist:
+            return CustomErrorResponse(
+                error_code="BILLING_ADDRESS_NOT_FOUND",
+                msj="Billing address not found.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(str(e))
+            return CustomErrorResponse(
+                error_code="INTERNAL_SERVER_ERROR",
+                msj="An internal server error occurred.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
