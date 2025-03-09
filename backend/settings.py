@@ -217,21 +217,34 @@ LOGGING = {
 firebase_credentials_base64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
 try:
     # Base64'ten decode et, sonra JSON olarak parse et
-    decoded_creds = base64.b64decode(
-        firebase_credentials_base64).decode('utf-8')
+    # Padding'i düzeltmek için eksik "=" karakterleri ekliyoruz
+    padding = 4 - (len(firebase_credentials_base64) % 4) if len(firebase_credentials_base64) % 4 != 0 else 0
+    firebase_credentials_base64_padded = firebase_credentials_base64 + "=" * padding
+    
+    decoded_creds = base64.b64decode(firebase_credentials_base64_padded).decode('utf-8')
     firebase_credentials_dict = json.loads(decoded_creds)
     cred = credentials.Certificate(firebase_credentials_dict)
     FIREBASE_APP = initialize_app(credential=cred)
 except Exception as e:
     print(f"Firebase credentials error: {e}")
-    raise e
+    # Hata durumunda uygulama durmasın, sadece log yazalım
+    FIREBASE_APP = None
+    print("Firebase devre dışı bırakıldı. Bildirimler çalışmayacak.")
 
-FCM_DJANGO_SETTINGS = {
-    "DEFAULT_FIREBASE_APP": FIREBASE_APP,
-    "APP_VERBOSE_NAME": 'FCM Django',
-    "ONE_DEVICE_PER_USER": False,
-    "DELETE_INACTIVE_DEVICES": False
-}
+if FIREBASE_APP:
+    FCM_DJANGO_SETTINGS = {
+        "DEFAULT_FIREBASE_APP": FIREBASE_APP,
+        "APP_VERBOSE_NAME": 'FCM Django',
+        "ONE_DEVICE_PER_USER": False,
+        "DELETE_INACTIVE_DEVICES": False
+    }
+else:
+    # Firebase kullanılamadığında, bildirimler devre dışı
+    FCM_DJANGO_SETTINGS = {
+        "APP_VERBOSE_NAME": 'FCM Django',
+        "ONE_DEVICE_PER_USER": False,
+        "DELETE_INACTIVE_DEVICES": False
+    }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
@@ -322,3 +335,4 @@ WHITENOISE_USE_FINDERS = True
 WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
 WHITENOISE_INDEX_FILE = True
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+X_API_KEY = "TEST"

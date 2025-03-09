@@ -145,21 +145,160 @@ class SendNotificationAPI(APIView):
         message_body = request_data.get("message")
 
         if not message_body:
-            return CustomErrorResponse(input_data={"error": "Message body is required"}, status_code=status.HTTP_400_BAD_REQUEST)
+            return CustomErrorResponse(msj={"error": "Message body is required"}, status_code=status.HTTP_400_BAD_REQUEST)
+
+        if not hasattr(settings, 'FIREBASE_APP') or settings.FIREBASE_APP is None:
+            Notification.objects.create(
+                user=user,
+                title=title,
+                message=message_body
+            )
+            logger.warning(
+                "Firebase yapılandırması bulunamadı. Bildirim sadece veritabanına kaydedildi.")
+            return CustomSuccessResponse(input_data={"warning": "Notification saved to database but not sent to devices due to Firebase configuration issue"}, status_code=status.HTTP_200_OK)
 
         devices = FCMDevice.objects.filter(user=user)
+
+        if not devices.exists():
+            Notification.objects.create(
+                user=user,
+                title=title,
+                message=message_body
+            )
+            return CustomSuccessResponse(input_data={"warning": "No devices registered for this user. Notification saved to database."}, status_code=status.HTTP_200_OK)
+
+        success_count = 0
+        error_messages = []
 
         for device in devices:
             try:
                 message = fbm.Message(
                     notification=fbm.Notification(
                         title=title, body=message_body),
-                    token=device.registration_id
+                    token=device.registration_id)
+
+                response = fbm.send(message)
+                logger.warning(response)
+                success_count += 1
+
+                Notification.objects.create(
+                    user=user,
+                    title=title,
+                    message=message_body
                 )
-                fbm.send(message)
+
             except Exception as e:
                 logger.error(
                     f"Failed to send message to device {device.registration_id}: {str(e)}")
-                return Response({"error": f"Failed to send message: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                error_messages.append(str(e))
 
-        return CustomSuccessResponse(status_code=status.HTTP_200_OK)
+        if success_count > 0:
+            return CustomSuccessResponse(input_data={"success": f"Successfully sent to {success_count} devices"}, status_code=status.HTTP_200_OK)
+        elif error_messages:
+            return CustomErrorResponse(msj={"error": f"Failed to send message: {error_messages}"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return CustomErrorResponse(msj={"error": "No messages were sent"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SendGeneralNotificationAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        operation_description="Send general notification to all registered devices",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description='Notification title'),
+                'message': openapi.Schema(type=openapi.TYPE_STRING, description='Notification message'),
+            },
+            required=['message']
+        ),
+        responses={
+            200: "Notification sent successfully",
+            400: "Message body is required",
+            403: "Invalid or missing API key",
+            500: "Failed to send message"
+        }
+    )
+    def post(self, request):
+        x_api_key = request.headers.get("x-api-key")
+        expected_api_key = getattr(settings, "X_API_KEY", None)
+        if not x_api_key or x_api_key != expected_api_key:
+            return CustomErrorResponse(
+                msj={"error": "Invalid or missing API key"},
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        request_data = request.data
+        title = request_data.get("title", "Gönder Gelsin")
+        message_body = request_data.get("message")
+
+        if not message_body:
+            return CustomErrorResponse(
+                msj={"error": "Message body is required"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not hasattr(settings, 'FIREBASE_APP') or settings.FIREBASE_APP is None:
+            logger.warning(
+                "Firebase yapılandırması bulunamadı. Genel bildirim gönderilemedi.")
+            return CustomErrorResponse(
+                msj={
+                    "error": "Firebase configuration not available. Cannot send general notifications."},
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        devices = FCMDevice.objects.all()
+
+        if not devices.exists():
+            return CustomErrorResponse(
+                msj={"error": "No devices found in the system."},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        sended_notification_count = 0
+        error_count = 0
+
+        for device in devices:
+            try:
+                if not device.registration_id:
+                    continue
+
+                message = fbm.Message(
+                    notification=fbm.Notification(
+                        title=title, body=message_body
+                    ),
+                    token=device.registration_id
+                )
+                response = fbm.send(message)
+                logger.warning(f"Device: {device.registration_id}, Response: {response}")
+                sended_notification_count += 1
+
+                if device.user:
+                    Notification.objects.create(
+                        user=device.user,
+                        title=title,
+                        message=message_body
+                    )
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Failed to send message to device {device.registration_id}: {str(e)}")
+
+        response_data = {
+            "total_device_count": devices.count(),
+            "notification_sent_count": sended_notification_count,
+            "error_count": error_count
+        }
+
+        if sended_notification_count > 0:
+            return CustomSuccessResponse(
+                status_code=status.HTTP_200_OK,
+                input_data=response_data
+            )
+        else:
+            return CustomErrorResponse(
+                msj={"error": "Failed to send notifications to any device.",
+                     "details": response_data},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
